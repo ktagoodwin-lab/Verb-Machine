@@ -1,0 +1,730 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The Prefix Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.cdnfonts.com/css/glacial-indifference" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; background: #fff; font-family: "Open Sans", system-ui, sans-serif; }
+  * { box-sizing: border-box; }
+  button { font-family: inherit; }
+  #root {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<!-- ── verb-data.js ── -->
+<script>
+// German prefix-verb data with pedagogy: meanings, examples, etymology, separability.
+window.PREFIXES = ['auf','ein','fest','vor','dar','her','um','aus','ab','an','er','ver','durch','unter','be','ent','zer','ge'];
+window.BASES = ['stellen','fahren','gehen','halten'];
+
+window.PREFIX_META = {
+  'auf':   { type: 'sep',   gloss: 'up / on / open' },
+  'ein':   { type: 'sep',   gloss: 'in / into' },
+  'fest':  { type: 'sep',   gloss: 'firm / fixed' },
+  'vor':   { type: 'sep',   gloss: 'before / in front' },
+  'dar':   { type: 'sep',   gloss: 'there / forth' },
+  'her':   { type: 'sep',   gloss: 'hither / toward speaker' },
+  'um':    { type: 'both',  gloss: 'around / over' },
+  'aus':   { type: 'sep',   gloss: 'out / from' },
+  'ab':    { type: 'sep',   gloss: 'off / away / down' },
+  'an':    { type: 'sep',   gloss: 'at / on / toward' },
+  'er':    { type: 'insep', gloss: 'achievement / completion' },
+  'ver':   { type: 'insep', gloss: 'change / away / wrong' },
+  'durch': { type: 'both',  gloss: 'through' },
+  'unter': { type: 'both',  gloss: 'under / among' },
+  'be':    { type: 'insep', gloss: 'transitivizer / "do to"' },
+  'ent':   { type: 'insep', gloss: 'away / un-' },
+  'zer':   { type: 'insep', gloss: 'apart / to pieces' },
+  'ge':    { type: 'insep', gloss: 'completed / collective' }
+};
+
+window.BASE_META = {
+  'stellen': { gloss: 'to place, to put (upright)' },
+  'fahren':  { gloss: 'to go (by vehicle), to drive' },
+  'gehen':   { gloss: 'to go (on foot)' },
+  'halten':  { gloss: 'to hold, to keep' }
+};
+
+window.VERBS = {
+  'aufstellen':    { meaning: 'to set up, erect, put up', sep: true,  ex: ['Wir stellen das Zelt auf.', 'We set up the tent.'] },
+  'einstellen':    { meaning: 'to adjust, to hire, to stop', sep: true, ex: ['Stell die Heizung ein.', 'Adjust the heating.'] },
+  'feststellen':   { meaning: 'to determine, to ascertain', sep: true,  ex: ['Ich stelle einen Fehler fest.', 'I notice an error.'] },
+  'vorstellen':    { meaning: 'to introduce; (sich) to imagine', sep: true, ex: ['Ich stelle mir das vor.', 'I imagine that.'] },
+  'darstellen':    { meaning: 'to depict, portray, represent', sep: true, ex: ['Was stellt das Bild dar?', 'What does the picture depict?'] },
+  'herstellen':    { meaning: 'to produce, to manufacture', sep: true, ex: ['Die Firma stellt Autos her.', 'The company makes cars.'] },
+  'umstellen':     { meaning: 'to rearrange / to surround', sep: 'both', ex: ['Wir stellen die Möbel um.', 'We rearrange the furniture.'] },
+  'ausstellen':    { meaning: 'to exhibit; to issue (document)', sep: true, ex: ['Das Museum stellt Bilder aus.', 'The museum exhibits paintings.'] },
+
+  'abfahren':      { meaning: 'to depart, to drive off', sep: true, ex: ['Der Zug fährt um acht ab.', 'The train departs at eight.'] },
+  'anfahren':      { meaning: 'to start moving; to hit', sep: true, ex: ['Das Auto fährt langsam an.', 'The car starts moving slowly.'] },
+  'auffahren':     { meaning: 'to drive up; to rear-end', sep: true, ex: ['Er ist auf mein Auto aufgefahren.', 'He rear-ended my car.'] },
+  'ausfahren':     { meaning: 'to drive out; to deliver', sep: true, ex: ['Wir fahren die Pakete aus.', 'We deliver the packages.'] },
+  'erfahren':      { meaning: 'to find out, to experience', sep: false, ex: ['Ich erfahre die Wahrheit.', 'I find out the truth.'] },
+  'verfahren':     { meaning: 'to proceed; (sich) to get lost', sep: false, ex: ['Wir haben uns verfahren.', 'We got lost driving.'] },
+  'umfahren':      { meaning: 'to drive around / to run over', sep: 'both', ex: ['Ich umfahre die Stadt.', 'I drive around the city.'] },
+  'durchfahren':   { meaning: 'to drive through', sep: 'both', ex: ['Wir fahren die Nacht durch.', 'We drive through the night.'] },
+
+  'aufgehen':      { meaning: 'to rise; to open; to work out', sep: true, ex: ['Die Sonne geht auf.', 'The sun is rising.'] },
+  'ausgehen':      { meaning: 'to go out; to run out', sep: true, ex: ['Wir gehen heute aus.', 'We are going out tonight.'] },
+  'eingehen':      { meaning: 'to enter into; to shrink; to die', sep: true, ex: ['Die Pflanze geht ein.', 'The plant is dying.'] },
+  'umgehen':       { meaning: 'to deal with / to circumvent', sep: 'both', ex: ['Sie geht gut mit Kindern um.', 'She is good with children.'] },
+  'vergehen':      { meaning: 'to pass, to elapse (time)', sep: false, ex: ['Die Zeit vergeht schnell.', 'Time passes quickly.'] },
+  'zergehen':      { meaning: 'to dissolve, to melt away', sep: false, ex: ['Die Schokolade zergeht im Mund.', 'The chocolate melts in your mouth.'] },
+  'angehen':       { meaning: 'to concern; to tackle', sep: true, ex: ['Das geht dich nichts an.', 'That does not concern you.'] },
+  'untergehen':    { meaning: 'to set (sun); to sink, perish', sep: true, ex: ['Das Schiff geht unter.', 'The ship is sinking.'] },
+
+  'aushalten':     { meaning: 'to endure, to bear, to stand', sep: true, ex: ['Ich halte das nicht aus.', 'I cannot stand this.'] },
+  'behalten':      { meaning: 'to keep, to retain, to remember', sep: false, ex: ['Behalte das für dich.', 'Keep that to yourself.'] },
+  'enthalten':     { meaning: 'to contain; (sich) to abstain', sep: false, ex: ['Das Buch enthält Bilder.', 'The book contains pictures.'] },
+  'erhalten':      { meaning: 'to receive, to obtain', sep: false, ex: ['Ich habe einen Brief erhalten.', 'I received a letter.'] },
+  'unterhalten':   { meaning: 'to entertain; (sich) to converse', sep: 'both', ex: ['Wir unterhalten uns gut.', 'We are having a good chat.'] },
+  'verhalten':     { meaning: '(sich) to behave', sep: false, ex: ['Verhalte dich ruhig.', 'Behave calmly.'] },
+  'durchhalten':   { meaning: 'to hold out, to persevere', sep: true, ex: ['Halte durch!', 'Hang in there!'] },
+  'vorbehalten':   { meaning: 'to reserve (rights)', sep: 'both', ex: ['Alle Rechte vorbehalten.', 'All rights reserved.'] }
+};
+
+window.ALL_VERBS = Object.keys(window.VERBS);
+
+window.literalGloss = function(prefix, base) {
+  const p = window.PREFIX_META[prefix];
+  const b = window.BASE_META[base];
+  const t = window.I18N ? window.I18N.t : (source) => source;
+  if (!p || !b) return '';
+  return prefix + ' (' + t(p.gloss) + ') + ' + base + ' (' + t(b.gloss) + ')';
+};
+
+window.splitVerb = function(verb) {
+  for (const base of window.BASES) {
+    if (verb.endsWith(base)) {
+      return { prefix: verb.slice(0, verb.length - base.length), base };
+    }
+  }
+  return null;
+};
+
+window.STATIC_TEXT = [
+  'The Prefix Lab',
+  'Unlock',
+  'Lock',
+  'prefix',
+  'base verb',
+  'Spin',
+  'Reveal',
+  'Pull the spin. Two halves will settle into a verb.',
+  'Spinning…',
+  'separable',
+  'inseparable',
+  'both separable and inseparable',
+  'Same spelling, two grammar patterns. With a stressed prefix, the prefix moves to the end in main clauses. With an unstressed prefix, the verb stays together and the meaning can change.',
+  'What does it mean?',
+  'literal',
+  'example',
+  '{seen} of {total} learned',
+  'show example'
+];
+
+window.I18N_FALLBACKS = {
+  de: {
+    'The Prefix Lab': 'Das Präfixlabor',
+    'Unlock': 'Entsperren',
+    'Lock': 'Sperren',
+    'prefix': 'Präfix',
+    'base verb': 'Grundverb',
+    'Spin': 'Drehen',
+    'Reveal': 'Aufdecken',
+    'Pull the spin. Two halves will settle into a verb.': 'Dreh die Rollen. Zwei Hälften ergeben ein Verb.',
+    'Spinning…': 'Dreht sich…',
+    'separable': 'trennbar',
+    'inseparable': 'untrennbar',
+    'both separable and inseparable': 'trennbar und untrennbar',
+    'Same spelling, two grammar patterns. With a stressed prefix, the prefix moves to the end in main clauses. With an unstressed prefix, the verb stays together and the meaning can change.': 'Gleiche Schreibung, zwei grammatische Muster. Wenn das Präfix betont ist, wandert es im Hauptsatz ans Ende. Wenn es unbetont ist, bleibt das Verb zusammen und die Bedeutung kann sich ändern.',
+    'What does it mean?': 'Was bedeutet es?',
+    'literal': 'wörtlich',
+    'example': 'Beispiel',
+    '{seen} of {total} learned': '{seen} von {total} gelernt',
+    'show example': 'Beispiel anzeigen',
+    'up / on / open': 'auf / an / offen',
+    'in / into': 'in / hinein',
+    'firm / fixed': 'fest / fixiert',
+    'before / in front': 'vor / voran',
+    'there / forth': 'da / hervor',
+    'hither / toward speaker': 'her / zum Sprecher hin',
+    'around / over': 'um / herum',
+    'out / from': 'aus / heraus',
+    'off / away / down': 'ab / weg / hinunter',
+    'at / on / toward': 'an / auf / zu',
+    'achievement / completion': 'Erreichen / Vollendung',
+    'change / away / wrong': 'Veränderung / weg / falsch',
+    'through': 'durch',
+    'under / among': 'unter / unter ihnen',
+    'transitivizer / "do to"': 'macht transitiv / auf etwas richten',
+    'away / un-': 'weg / ent-',
+    'apart / to pieces': 'auseinander / in Stücke',
+    'completed / collective': 'abgeschlossen / kollektiv',
+    'to place, to put (upright)': 'stellen, aufstellen',
+    'to go (by vehicle), to drive': 'fahren, mit einem Fahrzeug fahren',
+    'to go (on foot)': 'gehen, zu Fuß gehen',
+    'to hold, to keep': 'halten, behalten',
+    'to set up, erect, put up': 'aufstellen, errichten, aufbauen',
+    'to adjust, to hire, to stop': 'einstellen, anpassen, anstellen, beenden',
+    'to determine, to ascertain': 'feststellen, ermitteln',
+    'to introduce; (sich) to imagine': 'vorstellen; sich etwas vorstellen',
+    'to depict, portray, represent': 'darstellen, abbilden, repräsentieren',
+    'to produce, to manufacture': 'herstellen, produzieren',
+    'to rearrange / to surround': 'umstellen / umzingeln',
+    'to exhibit; to issue (document)': 'ausstellen; ein Dokument ausstellen',
+    'to depart, to drive off': 'abfahren, losfahren',
+    'to start moving; to hit': 'anfahren; anstoßen',
+    'to drive up; to rear-end': 'auffahren; hinten auffahren',
+    'to drive out; to deliver': 'hinausfahren; ausliefern',
+    'to find out, to experience': 'erfahren, herausfinden',
+    'to proceed; (sich) to get lost': 'verfahren; sich verfahren',
+    'to drive around / to run over': 'umfahren / überfahren',
+    'to drive through': 'durchfahren',
+    'to rise; to open; to work out': 'aufgehen; sich öffnen; gelingen',
+    'to go out; to run out': 'ausgehen; zu Ende gehen',
+    'to enter into; to shrink; to die': 'eingehen; einlaufen; sterben',
+    'to deal with / to circumvent': 'umgehen mit / umgehen',
+    'to pass, to elapse (time)': 'vergehen, ablaufen (Zeit)',
+    'to dissolve, to melt away': 'zergehen, schmelzen',
+    'to concern; to tackle': 'angehen; betreffen',
+    'to set (sun); to sink, perish': 'untergehen; versinken',
+    'to endure, to bear, to stand': 'aushalten, ertragen',
+    'to keep, to retain, to remember': 'behalten, sich merken',
+    'to contain; (sich) to abstain': 'enthalten; sich enthalten',
+    'to receive, to obtain': 'erhalten, bekommen',
+    'to entertain; (sich) to converse': 'unterhalten; sich unterhalten',
+    '(sich) to behave': 'sich verhalten',
+    'to hold out, to persevere': 'durchhalten, weitermachen',
+    'to reserve (rights)': 'vorbehalten (Rechte)',
+    'We set up the tent.': 'Wir bauen das Zelt auf.',
+    'Adjust the heating.': 'Stell die Heizung ein.',
+    'I notice an error.': 'Ich stelle einen Fehler fest.',
+    'I imagine that.': 'Ich stelle mir das vor.',
+    'What does the picture depict?': 'Was stellt das Bild dar?',
+    'The company makes cars.': 'Die Firma stellt Autos her.',
+    'We rearrange the furniture.': 'Wir stellen die Möbel um.',
+    'The museum exhibits paintings.': 'Das Museum stellt Bilder aus.',
+    'The train departs at eight.': 'Der Zug fährt um acht ab.',
+    'The car starts moving slowly.': 'Das Auto fährt langsam an.',
+    'He rear-ended my car.': 'Er ist auf mein Auto aufgefahren.',
+    'We deliver the packages.': 'Wir liefern die Pakete aus.',
+    'I find out the truth.': 'Ich erfahre die Wahrheit.',
+    'We got lost driving.': 'Wir haben uns verfahren.',
+    'I drive around the city.': 'Ich umfahre die Stadt.',
+    'We drive through the night.': 'Wir fahren die Nacht durch.',
+    'The sun is rising.': 'Die Sonne geht auf.',
+    'We are going out tonight.': 'Wir gehen heute Abend aus.',
+    'The plant is dying.': 'Die Pflanze geht ein.',
+    'She is good with children.': 'Sie geht gut mit Kindern um.',
+    'Time passes quickly.': 'Die Zeit vergeht schnell.',
+    'The chocolate melts in your mouth.': 'Die Schokolade zergeht im Mund.',
+    'That does not concern you.': 'Das geht dich nichts an.',
+    'The ship is sinking.': 'Das Schiff geht unter.',
+    'I cannot stand this.': 'Ich halte das nicht aus.',
+    'Keep that to yourself.': 'Behalte das für dich.',
+    'The book contains pictures.': 'Das Buch enthält Bilder.',
+    'I received a letter.': 'Ich habe einen Brief erhalten.',
+    'We are having a good chat.': 'Wir unterhalten uns gut.',
+    'Behave calmly.': 'Verhalte dich ruhig.',
+    'Hang in there!': 'Halte durch!',
+    'All rights reserved.': 'Alle Rechte vorbehalten.'
+  }
+};
+
+window.collectTranslatableText = function() {
+  const text = new Set(window.STATIC_TEXT);
+  Object.values(window.PREFIX_META).forEach((meta) => text.add(meta.gloss));
+  Object.values(window.BASE_META).forEach((meta) => text.add(meta.gloss));
+  Object.values(window.VERBS).forEach((verb) => {
+    text.add(verb.meaning);
+    if (verb.ex && verb.ex[1]) text.add(verb.ex[1]);
+  });
+  return Array.from(text).filter(Boolean);
+};
+
+window.I18N = (() => {
+  const preferred = ((navigator.languages && navigator.languages[0]) || navigator.language || 'en').toLowerCase();
+  const target = preferred.split('-')[0];
+  const values = {};
+  const listeners = new Set();
+
+  const notify = () => listeners.forEach((listener) => listener());
+  const setValues = (next) => {
+    Object.assign(values, next);
+    document.title = values['The Prefix Lab'] || 'The Prefix Lab';
+    notify();
+  };
+
+  async function createBrowserTranslator() {
+    const options = { sourceLanguage: 'en', targetLanguage: target };
+    const APIs = [
+      window.Translator,
+      window.translation,
+      window.ai && window.ai.translator
+    ].filter(Boolean);
+
+    for (const api of APIs) {
+      try {
+        if (api.availability) {
+          const status = await api.availability(options);
+          if (status === 'unavailable') continue;
+        }
+        if (api.create) return await api.create(options);
+        if (api.createTranslator) return await api.createTranslator(options);
+      } catch (error) {}
+    }
+    return null;
+  }
+
+  async function translateWithBrowser() {
+    const translator = await createBrowserTranslator();
+    if (!translator || !translator.translate) return null;
+    const translated = {};
+    for (const source of window.collectTranslatableText()) {
+      try {
+        const result = await translator.translate(source);
+        if (typeof result === 'string' && result.trim()) translated[source] = result;
+      } catch (error) {}
+    }
+    return Object.keys(translated).length ? translated : null;
+  }
+
+  async function init() {
+    if (target === 'en') {
+      document.documentElement.lang = 'en';
+      return;
+    }
+
+    if (window.I18N_FALLBACKS[target]) {
+      document.documentElement.lang = preferred;
+      setValues(window.I18N_FALLBACKS[target]);
+      return;
+    }
+
+    const translated = await translateWithBrowser();
+    if (translated) {
+      document.documentElement.lang = preferred;
+      setValues(translated);
+    } else {
+      document.documentElement.lang = 'en';
+    }
+  }
+
+  return {
+    lang: preferred,
+    t: (source) => values[source] || source,
+    format: (source, vars) => {
+      let output = values[source] || source;
+      Object.entries(vars).forEach(([key, value]) => {
+        output = output.split(`{${key}}`).join(String(value));
+      });
+      return output;
+    },
+    subscribe: (listener) => {
+      listeners.add(listener);
+      return () => listeners.delete(listener);
+    },
+    init
+  };
+})();
+
+window.I18N.init();
+</script>
+
+<!-- ── verb-machine-core.jsx ── -->
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useRef, useCallback } = React;
+
+window.useI18n = function useI18n() {
+  const [, setVersion] = useState(0);
+  useEffect(() => window.I18N.subscribe(() => setVersion((version) => version + 1)), []);
+  return {
+    lang: window.I18N.lang,
+    t: window.I18N.t,
+    format: window.I18N.format
+  };
+};
+
+window.useVerbMachine = function useVerbMachine() {
+  const [prefix, setPrefix] = useState(null);
+  const [base, setBase] = useState(null);
+  const [spinning, setSpinning] = useState({ prefix: false, base: false });
+  const [locked, setLocked] = useState({ prefix: false, base: false });
+  const [revealed, setRevealed] = useState(false);
+  const [seen, setSeen] = useState(() => new Set());
+  const [history, setHistory] = useState([]);
+  const [spinId, setSpinId] = useState(0);
+
+  const pickVerb = useCallback(() => {
+    const candidates = window.ALL_VERBS.filter(v => {
+      const parts = window.splitVerb(v);
+      if (locked.prefix && prefix && parts.prefix !== prefix) return false;
+      if (locked.base   && base   && parts.base   !== base) return false;
+      return true;
+    });
+    const unseen = candidates.filter(v => !seen.has(v));
+    const pool = unseen.length > 0 ? unseen : candidates;
+    return pool[Math.floor(Math.random() * pool.length)];
+  }, [locked, prefix, base, seen]);
+
+  const spin = useCallback(() => {
+    if (locked.prefix && locked.base) return;
+    const verb = pickVerb();
+    const parts = window.splitVerb(verb);
+    setRevealed(false);
+    setSpinning({ prefix: !locked.prefix, base: !locked.base });
+    setSpinId(id => id + 1);
+    if (!locked.prefix) setPrefix(parts.prefix);
+    if (!locked.base)   setBase(parts.base);
+  }, [locked, pickVerb]);
+
+  const settleReel = useCallback((which) => {
+    setSpinning(s => ({ ...s, [which]: false }));
+  }, []);
+
+  const reveal = useCallback(() => {
+    if (!prefix || !base) return;
+    const verb = prefix + base;
+    if (!window.VERBS[verb]) return;
+    setRevealed(true);
+    setSeen(s => {
+      const next = new Set(s);
+      next.add(verb);
+      return next;
+    });
+    setHistory(h => [verb, ...h.filter(x => x !== verb)].slice(0, 5));
+  }, [prefix, base]);
+
+  const toggleLock = useCallback((which) => {
+    setLocked(l => ({ ...l, [which]: !l[which] }));
+  }, []);
+
+  const reset = useCallback(() => {
+    setPrefix(null); setBase(null);
+    setLocked({ prefix: false, base: false });
+    setSpinning({ prefix: false, base: false });
+    setRevealed(false);
+    setSeen(new Set());
+    setHistory([]);
+  }, []);
+
+  const verb = (prefix && base) ? prefix + base : null;
+  const isValid = verb && !!window.VERBS[verb];
+  const data = isValid ? window.VERBS[verb] : null;
+  const isSpinning = spinning.prefix || spinning.base;
+
+  return {
+    prefix, base, verb, data, isValid,
+    spinning, isSpinning, spinId,
+    locked, toggleLock,
+    revealed, seen, history,
+    spin, reveal, reset, settleReel
+  };
+};
+
+window.Reel = function Reel({ items, target, spinning, spinId, onSettle, height = 84, duration = 2.4, renderItem, className = '', style = {} }) {
+  const stripRef = useRef(null);
+  const REPEAT = 30;
+  const lastRunRef = useRef(0);
+  const settleRef = useRef(onSettle);
+  settleRef.current = onSettle;
+
+  useEffect(() => {
+    if (!stripRef.current) return;
+    if (!spinning) return;
+    if (spinId === lastRunRef.current) return;
+    lastRunRef.current = spinId;
+
+    const el = stripRef.current;
+    const targetIdx = items.indexOf(target);
+    el.style.transition = 'none';
+    el.style.transform = 'translateY(0px)';
+    void el.offsetHeight;
+    const targetY = -((Math.floor(REPEAT * 0.8) * items.length + Math.max(0, targetIdx)) * height);
+    el.style.transition = `transform ${duration}s cubic-bezier(0.18, 0.7, 0.18, 1)`;
+    el.style.transform = `translateY(${targetY}px)`;
+    const t = setTimeout(() => settleRef.current && settleRef.current(), duration * 1000 + 30);
+    return () => clearTimeout(t);
+  }, [spinId, spinning]);
+
+  return (
+    <div className={className} style={{ height, overflow: 'hidden', position: 'relative', ...style }}>
+      <div ref={stripRef} style={{ position: 'absolute', top: 0, left: 0, right: 0, willChange: 'transform' }}>
+        {Array.from({ length: REPEAT }).flatMap((_, r) =>
+          items.map((it, i) => (
+            <div key={`${r}-${i}`} style={{ height, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              {renderItem(it)}
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+};
+</script>
+
+<!-- ── machine-a-editorial.jsx ── -->
+<script type="text/babel" data-presets="react">
+const { useState: useStateA } = React;
+
+window.MachineA = function MachineA() {
+  const m = window.useVerbMachine();
+  const { t, format } = window.useI18n();
+  const [showExample, setShowExample] = useStateA(true);
+
+  const REEL_H = 92;
+
+  const reelStyle = {
+    background: '#faf8f3',
+    borderRadius: 2,
+    border: '1px solid #1a1a1a',
+    position: 'relative',
+    overflow: 'hidden'
+  };
+
+  const labelStyle = {
+    fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase',
+    fontFamily: '"Open Sans", "Helvetica Neue", sans-serif', fontWeight: 500,
+    color: '#7a7268', textAlign: 'center', marginBottom: 8
+  };
+
+  const lockBtn = (which) => {
+    const locked = m.locked[which];
+    return (
+      <button
+        onClick={() => m.toggleLock(which)}
+        aria-label={locked ? t('Unlock') : t('Lock')}
+        style={{
+          position: 'absolute', top: 6, right: 6,
+          width: 24, height: 24, borderRadius: 12,
+          background: locked ? '#252535' : '#f6f7f9',
+          color: locked ? '#ffffff' : '#252535',
+          border: '1px solid #252535',
+          cursor: 'pointer', padding: 0, zIndex: 2,
+          display: 'flex', alignItems: 'center', justifyContent: 'center'
+        }}
+      >
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <rect x="2.25" y="5.75" width="8.5" height="5.5" rx="1" />
+          <path d={locked ? 'M4 5.75V4.25a2.5 2.5 0 0 1 5 0v1.5' : 'M4 5.75V4.25a2.5 2.5 0 0 1 4.3-1.74'} />
+        </svg>
+      </button>
+    );
+  };
+
+  const verb = m.verb;
+  const data = m.data;
+  const parts = verb ? window.splitVerb(verb) : null;
+
+  return (
+    <div style={{
+      width: 'min(560px, calc(100vw - 48px))', padding: '40px 36px',
+      background: '#f6f7f9',
+      color: '#1a1a1a',
+      fontFamily: '"Open Sans", "Helvetica Neue", sans-serif',
+      borderRadius: 4
+    }}>
+      {/* Header */}
+      <div style={{ textAlign: 'center', marginBottom: 28 }}>
+        <div lang="de" translate="no" style={{ fontSize: 10, letterSpacing: '0.32em', textTransform: 'uppercase', color: '#252535' }}>Vorsilbe + Verb</div>
+        <div style={{ fontFamily: '"Glacial Indifference", sans-serif', fontSize: 30, fontWeight: 400, marginTop: 8, fontStyle: 'italic' }}>
+          {t('The Prefix Lab')}
+        </div>
+        <div style={{ height: 1, background: '#1a1a1a', margin: '20px auto 0', width: 48 }} />
+      </div>
+
+      {/* Reels */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 22 }}>
+        <div style={{ position: 'relative' }}>
+          <div style={labelStyle}>{t('prefix')}</div>
+          <div style={{ ...reelStyle, height: REEL_H }}>
+            {lockBtn('prefix')}
+            <window.Reel
+              items={window.PREFIXES}
+              target={m.prefix}
+              spinning={m.spinning.prefix}
+              spinId={m.spinId}
+              onSettle={() => m.settleReel('prefix')}
+              height={REEL_H}
+              duration={2.2}
+              renderItem={(it) => (
+                <span lang="de" translate="no" style={{
+                  fontFamily: '"Glacial Indifference", sans-serif',
+                  fontSize: 36, fontWeight: 400, color: '#252535'
+                }}>{it}-</span>
+              )}
+            />
+            <div style={{ position: 'absolute', left: 0, right: 0, top: '50%', height: 1, background: '#252535', opacity: 0.08, pointerEvents: 'none' }} />
+          </div>
+        </div>
+        <div style={{ position: 'relative' }}>
+          <div style={labelStyle}>{t('base verb')}</div>
+          <div style={{ ...reelStyle, height: REEL_H }}>
+            {lockBtn('base')}
+            <window.Reel
+              items={window.BASES}
+              target={m.base}
+              spinning={m.spinning.base}
+              spinId={m.spinId}
+              onSettle={() => m.settleReel('base')}
+              height={REEL_H}
+              duration={2.6}
+              renderItem={(it) => (
+                <span lang="de" translate="no" style={{
+                  fontFamily: '"Glacial Indifference", sans-serif',
+                  fontSize: 32, fontWeight: 400, color: '#252535'
+                }}>{it}</span>
+              )}
+            />
+            <div style={{ position: 'absolute', left: 0, right: 0, top: '50%', height: 1, background: '#252535', opacity: 0.08, pointerEvents: 'none' }} />
+          </div>
+        </div>
+      </div>
+
+      {/* Buttons */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 28 }}>
+        <button
+          onClick={m.spin}
+          disabled={m.isSpinning || (m.locked.prefix && m.locked.base)}
+          style={{
+            flex: 1, height: 44,
+            background: '#252535', color: '#ffffff', borderBottom: '4px solid #c8d400',
+            fontFamily: 'inherit', fontSize: 13, letterSpacing: '0.12em', textTransform: 'uppercase', fontWeight: 500,
+            cursor: m.isSpinning ? 'wait' : 'pointer',
+            opacity: (m.locked.prefix && m.locked.base) ? 0.4 : 1
+          }}
+        >{t('Spin')}</button>
+      </div>
+
+      {/* Result */}
+      <div style={{ minHeight: 200 }}>
+        {!verb && !m.isSpinning && (
+          <div style={{ textAlign: 'center', padding: '40px 0', color: '#7a7268', fontSize: 13, fontStyle: 'italic', fontFamily: '"Glacial Indifference", sans-serif' }}>
+            {t('Pull the spin. Two halves will settle into a verb.')}
+          </div>
+        )}
+        {m.isSpinning && (
+          <div style={{ textAlign: 'center', padding: '40px 0', color: '#7a7268', fontSize: 13, fontStyle: 'italic', fontFamily: '"Glacial Indifference", sans-serif' }}>
+            {t('Spinning…')}
+          </div>
+        )}
+        {verb && !m.isSpinning && (
+          <div>
+            <div style={{ textAlign: 'center', padding: '22px 0', marginBottom: 18 }}>
+              <div style={{ fontSize: 10, letterSpacing: '0.32em', textTransform: 'uppercase', color: '#7a7268', marginBottom: 10 }}>
+                {data?.sep === true ? t('separable') : data?.sep === false ? t('inseparable') : data?.sep === 'both' ? t('both separable and inseparable') : ''}
+              </div>
+              <div lang="de" translate="no" style={{
+                fontFamily: '"Glacial Indifference", sans-serif',
+                fontSize: 44, fontWeight: 400, lineHeight: 1.05, letterSpacing: '-0.01em'
+              }}>
+                <span style={{ color: '#56586F' }}>{parts?.prefix}</span>{parts?.base}
+              </div>
+              {data?.sep === 'both' && (
+                <div style={{
+                  maxWidth: 430,
+                  margin: '14px auto 0',
+                  color: '#4d4e61',
+                  fontSize: 12,
+                  lineHeight: 1.55,
+                  fontFamily: '"Open Sans", "Helvetica Neue", sans-serif'
+                }}>
+                  {t('Same spelling, two grammar patterns. With a stressed prefix, the prefix moves to the end in main clauses. With an unstressed prefix, the verb stays together and the meaning can change.')}
+                </div>
+              )}
+              {!m.revealed && (
+                <div style={{ marginTop: data?.sep === 'both' ? 16 : 14 }}>
+                  <div style={{ fontSize: 13, color: '#252535', fontStyle: 'italic', fontFamily: '"Glacial Indifference", sans-serif' }}>
+                    {t('What does it mean?')}
+                  </div>
+                  <button
+                    onClick={m.reveal}
+                    disabled={!m.isValid || m.isSpinning || m.revealed}
+                    style={{
+                      height: 40,
+                      marginTop: 12,
+                      padding: '0 28px',
+                      background: 'transparent', color: '#1a1a1a',
+                      border: '1px solid #1a1a1a',
+                      fontFamily: 'inherit', fontSize: 13, letterSpacing: '0.12em', textTransform: 'uppercase', fontWeight: 500,
+                      cursor: 'pointer',
+                      opacity: (!m.isValid || m.isSpinning || m.revealed) ? 0.35 : 1
+                    }}
+                  >{t('Reveal')}</button>
+                </div>
+              )}
+            </div>
+
+            {m.revealed && data && (
+              <div>
+                <div style={{ fontSize: 17, lineHeight: 1.5, marginBottom: 16, fontFamily: '"Glacial Indifference", sans-serif' }}>
+                  {t(data.meaning)}
+                </div>
+
+                <div style={{ display: 'flex', gap: 12, marginBottom: 16, alignItems: 'baseline' }}>
+                  <div style={{ fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: '#7a7268', minWidth: 56 }}>{t('literal')}</div>
+                  <div style={{ fontSize: 12, color: '#3a3a3a', lineHeight: 1.5 }}>
+                    {window.literalGloss(parts.prefix, parts.base)}
+                  </div>
+                </div>
+
+                {showExample && data.ex && (
+                  <div style={{ display: 'flex', gap: 12, marginBottom: 6, alignItems: 'baseline' }}>
+                    <div style={{ fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: '#7a7268', minWidth: 56 }}>{t('example')}</div>
+                    <div>
+                      <div lang="de" translate="no" style={{ fontSize: 14, fontFamily: '"Glacial Indifference", sans-serif', fontStyle: 'italic', marginBottom: 4 }}>
+                        „{data.ex[0]}"
+                      </div>
+                      <div style={{ fontSize: 12, color: '#7a7268' }}>{t(data.ex[1])}</div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Footer */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 22, paddingTop: 16, borderTop: '1px solid rgba(26,26,26,0.15)' }}>
+        <div style={{ fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7a7268' }}>
+          {format('{seen} of {total} learned', { seen: m.seen.size, total: window.ALL_VERBS.length })}
+        </div>
+        <label style={{ fontSize: 11, letterSpacing: '0.05em', color: '#7a7268', display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
+          <input type="checkbox" checked={showExample} onChange={e => setShowExample(e.target.checked)} style={{ accentColor: '#1a1a1a' }} />
+          {t('show example')}
+        </label>
+      </div>
+    </div>
+  );
+};
+</script>
+
+<!-- ── App ── -->
+<script type="text/babel" data-presets="react">
+function App() {
+  return (
+    <window.MachineA />
+  );
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
