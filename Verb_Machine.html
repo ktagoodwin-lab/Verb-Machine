@@ -126,7 +126,7 @@ window.STATIC_TEXT = [
   'base verb',
   'Spin',
   'Reveal',
-  'Pull the spin. Two halves will settle into a verb.',
+  'Click "Spin" to build a verb.',
   'Spinning…',
   'separable',
   'inseparable',
@@ -148,7 +148,7 @@ window.I18N_FALLBACKS = {
     'base verb': 'Grundverb',
     'Spin': 'Drehen',
     'Reveal': 'Aufdecken',
-    'Pull the spin. Two halves will settle into a verb.': 'Dreh die Rollen. Zwei Hälften ergeben ein Verb.',
+    'Click "Spin" to build a verb.': 'Klicke auf „Drehen“, um ein Verb zu bilden.',
     'Spinning…': 'Dreht sich…',
     'separable': 'trennbar',
     'inseparable': 'untrennbar',
@@ -502,7 +502,7 @@ window.MachineA = function MachineA() {
   const labelStyle = {
     fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase',
     fontFamily: '"Open Sans", "Helvetica Neue", sans-serif', fontWeight: 500,
-    color: '#7a7268', textAlign: 'center', marginBottom: 8
+    color: '#858799', textAlign: 'center', marginBottom: 8
   };
 
   const lockBtn = (which) => {
@@ -605,7 +605,7 @@ window.MachineA = function MachineA() {
           disabled={m.isSpinning || (m.locked.prefix && m.locked.base)}
           style={{
             flex: 1, height: 44,
-            background: '#252535', color: '#ffffff', borderBottom: '4px solid #c8d400',
+            background: '#252535', color: '#ffffff', 
             fontFamily: 'inherit', fontSize: 13, letterSpacing: '0.12em', textTransform: 'uppercase', fontWeight: 500,
             cursor: m.isSpinning ? 'wait' : 'pointer',
             opacity: (m.locked.prefix && m.locked.base) ? 0.4 : 1
@@ -616,26 +616,26 @@ window.MachineA = function MachineA() {
       {/* Result */}
       <div style={{ minHeight: 200 }}>
         {!verb && !m.isSpinning && (
-          <div style={{ textAlign: 'center', padding: '40px 0', color: '#7a7268', fontSize: 13, fontStyle: 'italic', fontFamily: '"Glacial Indifference", sans-serif' }}>
-            {t('Pull the spin. Two halves will settle into a verb.')}
+          <div style={{ textAlign: 'center', padding: '40px 0', color: '#858799', fontSize: 13, fontStyle: 'italic', fontFamily: '"Glacial Indifference", sans-serif' }}>
+            {t('Click "Spin" to build a verb.')}
           </div>
         )}
         {m.isSpinning && (
-          <div style={{ textAlign: 'center', padding: '40px 0', color: '#7a7268', fontSize: 13, fontStyle: 'italic', fontFamily: '"Glacial Indifference", sans-serif' }}>
+          <div style={{ textAlign: 'center', padding: '40px 0', color: '#858799', fontSize: 13, fontStyle: 'italic', fontFamily: '"Glacial Indifference", sans-serif' }}>
             {t('Spinning…')}
           </div>
         )}
         {verb && !m.isSpinning && (
           <div>
             <div style={{ textAlign: 'center', padding: '22px 0', marginBottom: 18 }}>
-              <div style={{ fontSize: 10, letterSpacing: '0.32em', textTransform: 'uppercase', color: '#7a7268', marginBottom: 10 }}>
+              <div style={{ fontSize: 10, letterSpacing: '0.32em', textTransform: 'uppercase', color: '#858799', marginBottom: 10 }}>
                 {data?.sep === true ? t('separable') : data?.sep === false ? t('inseparable') : data?.sep === 'both' ? t('both separable and inseparable') : ''}
               </div>
               <div lang="de" translate="no" style={{
                 fontFamily: '"Glacial Indifference", sans-serif',
                 fontSize: 44, fontWeight: 400, lineHeight: 1.05, letterSpacing: '-0.01em'
               }}>
-                <span style={{ color: '#56586F' }}>{parts?.prefix}</span>{parts?.base}
+                <span style={{ color: '#659DF1' }}>{parts?.prefix}</span>{parts?.base}
               </div>
               {data?.sep === 'both' && (
                 <div style={{
@@ -651,7 +651,7 @@ window.MachineA = function MachineA() {
               )}
               {!m.revealed && (
                 <div style={{ marginTop: data?.sep === 'both' ? 16 : 14 }}>
-                  <div style={{ fontSize: 13, color: '#252535', fontStyle: 'italic', fontFamily: '"Glacial Indifference", sans-serif' }}>
+                  <div style={{ fontSize: 10, letterSpacing: '0.32em', textTransform: 'uppercase', color: '#858799',}}>
                     {t('What does it mean?')}
                   </div>
                   <button
@@ -661,11 +661,10 @@ window.MachineA = function MachineA() {
                       height: 40,
                       marginTop: 12,
                       padding: '0 28px',
-                      background: 'transparent', color: '#1a1a1a',
+                      background: 'ffffff', color: '#1a1a1a',
                       border: '1px solid #1a1a1a',
                       fontFamily: 'inherit', fontSize: 13, letterSpacing: '0.12em', textTransform: 'uppercase', fontWeight: 500,
-                      cursor: 'pointer',
-                      opacity: (!m.isValid || m.isSpinning || m.revealed) ? 0.35 : 1
+                      cursor: 'pointer'
                     }}
                   >{t('Reveal')}</button>
                 </div>
@@ -673,13 +672,13 @@ window.MachineA = function MachineA() {
             </div>
 
             {m.revealed && data && (
-              <div>
+              <div style={{borderLeft: '5px solid #dadde7', padding: 15, }}>
                 <div style={{ fontSize: 17, lineHeight: 1.5, marginBottom: 16, fontFamily: '"Glacial Indifference", sans-serif' }}>
                   {t(data.meaning)}
                 </div>
 
                 <div style={{ display: 'flex', gap: 12, marginBottom: 16, alignItems: 'baseline' }}>
-                  <div style={{ fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: '#7a7268', minWidth: 56 }}>{t('literal')}</div>
+                  <div style={{ fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: '#858799', minWidth: 56 }}>{t('literal')}</div>
                   <div style={{ fontSize: 12, color: '#3a3a3a', lineHeight: 1.5 }}>
                     {window.literalGloss(parts.prefix, parts.base)}
                   </div>
@@ -687,12 +686,12 @@ window.MachineA = function MachineA() {
 
                 {showExample && data.ex && (
                   <div style={{ display: 'flex', gap: 12, marginBottom: 6, alignItems: 'baseline' }}>
-                    <div style={{ fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: '#7a7268', minWidth: 56 }}>{t('example')}</div>
+                    <div style={{ fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: '#858799', minWidth: 56 }}>{t('example')}</div>
                     <div>
                       <div lang="de" translate="no" style={{ fontSize: 14, fontFamily: '"Glacial Indifference", sans-serif', fontStyle: 'italic', marginBottom: 4 }}>
                         „{data.ex[0]}"
                       </div>
-                      <div style={{ fontSize: 12, color: '#7a7268' }}>{t(data.ex[1])}</div>
+                      <div style={{ fontSize: 12, color: '#858799' }}>{t(data.ex[1])}</div>
                     </div>
                   </div>
                 )}
@@ -703,11 +702,11 @@ window.MachineA = function MachineA() {
       </div>
 
       {/* Footer */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 22, paddingTop: 16, borderTop: '1px solid rgba(26,26,26,0.15)' }}>
-        <div style={{ fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7a7268' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 22, paddingTop: 16 }}>
+        <div style={{ fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#858799' }}>
           {format('{seen} of {total} learned', { seen: m.seen.size, total: window.ALL_VERBS.length })}
         </div>
-        <label style={{ fontSize: 11, letterSpacing: '0.05em', color: '#7a7268', display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
+        <label style={{ fontSize: 11, letterSpacing: '0.05em', color: '#858799', display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
           <input type="checkbox" checked={showExample} onChange={e => setShowExample(e.target.checked)} style={{ accentColor: '#1a1a1a' }} />
           {t('show example')}
         </label>
